@@ -1,41 +1,51 @@
-import React, { useState } from 'react'
-import Button from './Button'
-import Display from './Display'
-import './Calculator.css'
+import React, { useState } from 'react';
+import Button from './Button';
+import Display from './Display';
+import './Calculator.css';
 
-const Calculator = () => {
+export default function Calculator  ()  {
   const [input, setInput] = useState('')
-  const [output, setOutput] = useState('0') // Inicializa con '0'
+  const [output, setOutput] = useState('0')
+  const [isCalculated, setIsCalculated] = useState(false) // Estado para manejar si ya se ha calculado algo
 
   const handleClick = (value) => {
     if (value === '=') {
-      if(output) {
-        try {
-          setInput(output)
-          setOutput(eval(input))
-        } catch {
-          setOutput('Error')
-        }
-      } else {
-        try {
-          setOutput(eval(input)); // Nota: Usar eval puede ser peligroso en producción
-        } catch (e) {
-          setOutput('Error');
-        }
-        setInput(eval(input))
+      try {
+        const result = eval(input)
+        setOutput(String(result)) // Mostrar el resultado
+        setInput(String(result)) // Usar el resultado como nuevo input
+        setIsCalculated(true); // Marcar que ya se ha calculado
+      } catch (e) {
+        setOutput('Error');
       }
-      
-      
     } else if (value === 'C') {
       setInput('');
-      setOutput('0'); // Restablece el output a '0' cuando se limpia
-    }else {
-      if (input === '' && value === '0') return; // Evita que el input empiece con '0'
-      setInput(input + value);
-      if (value === '0' && input === '') {
-        setOutput('0'); // Muestra '0' cuando el input está vacío
+      setOutput('0');
+      setIsCalculated(false); // Restablecer el estado del cálculo
+    } else if (['+', '-', '*', '/'].includes(value)) {
+      if (isCalculated) {
+        // Si se presiona un operador justo después de un cálculo
+        const newInput = output + value;
+        setInput(newInput);
+        setOutput(newInput); // Mostrar el operador inmediatamente
+        setIsCalculated(false);
       } else {
-        setOutput(input + value);
+        // Continuar con la operación normalmente
+        const newInput = input + value;
+        setInput(newInput);
+        setOutput(newInput); // Mostrar el operador inmediatamente
+      }
+    } else {
+      if (isCalculated) {
+        // Si se presiona un número justo después de un cálculo
+        setInput(value);
+        setOutput(value);
+        setIsCalculated(false);
+      } else {
+        // Continuar agregando al input
+        const newInput = input + value;
+        setInput(newInput);
+        setOutput(newInput);
       }
     }
   };
@@ -59,4 +69,4 @@ const Calculator = () => {
   );
 };
 
-export default Calculator;
+
